@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!--
+    status属性：查看log4j的装配过程，值为OFF表示关闭，值为debug等日志级别为查看日志过程
+-->
+<configuration status="OFF">
+    <!--定义附加器，需要在appender标签中定义-->
+    <Appenders>
+        <!--
+            name属性：定义追加器的标识名称
+            target:定义输出日志形式    SYSTEM_OUT/SYSTEM_ERR
+        -->
+        <Console name="console" target="SYSTEM_OUT">
+            <PatternLayout pattern="[log4j2-demo]  %-d{yyyy-MM-dd HH-mm-ss.SSS} [%-5p] %C:%L  %m%n"/>
+        </Console>
+    </Appenders>
+
+    <Loggers>
+        <!-- 定义根日志 -->
+        <!-- level ： 指定根日志的日志输出级别 -->
+        <Root level="info">
+            <!-- 引用日志追加器，和上面定义的追加器的名称一样-->
+            <AppenderRef ref="console"/>
+        </Root>
+    </Loggers>
+
+</configuration>
