@@ -5,6 +5,7 @@ import org.apache.logging.log4j.Logger;
 import org.junit.jupiter.api.Test;
 
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintWriter;
 import java.net.InetSocketAddress;
@@ -25,32 +26,31 @@ import java.util.Set;
  */
 public class MiniBrowser {
     private static Logger logger= LogManager.getLogger(LogManager.ROOT_LOGGER_NAME);
-    @Test
-    void testBrowser(){
+    public static void main(String[] args) {
         String browser =  "http://static.how2j.cn/diytomcat.html";
         String contextString = getContextString(browser,false);
         logger.info(contextString);
         String httpString = getHttpString(browser,false);
         logger.info(httpString);
-
     }
 
-    private String getHttpString(String browser, boolean gzip) {
+
+    private static String getHttpString(String browser, boolean gzip) {
         byte[]  bytes=getHttpBytes(browser,gzip);
         return new String(bytes).trim();
     }
-    public String getContextString(String browser){
-      return   this.getContextString(browser,false);
+    public static String getContextString(String browser){
+        return   getContextString(browser,false);
     }
-    private String getContextString(String browser, boolean gzip) {
-       byte[] result =  getContextBytes(browser,gzip);
-       if (result == null){
-           return null;
-       }
+    private static String getContextString(String browser, boolean gzip) {
+        byte[] result =  getContextBytes(browser,gzip);
+        if (result == null){
+            return null;
+        }
         return new String(result, StandardCharsets.UTF_8).trim();
     }
 
-    private byte[] getContextBytes(String browser, boolean gzip) {
+    private static byte[] getContextBytes(String browser, boolean gzip) {
         byte[] response = getHttpBytes(browser,gzip);
         byte[] doubleReturn = "\r\n\r\n".getBytes(StandardCharsets.UTF_8);
         int pos = -1;
@@ -69,7 +69,7 @@ public class MiniBrowser {
         return Arrays.copyOfRange(response,pos,response.length);
     }
 
-    private byte[] getHttpBytes(String browser, boolean gzip) {
+    private static byte[] getHttpBytes(String browser, boolean gzip) {
         byte[] result = null;
         try {
             URL u = new URL(browser);
@@ -103,20 +103,8 @@ public class MiniBrowser {
             PrintWriter pWriter = new PrintWriter(client.getOutputStream(), true);
             pWriter.println(httpRequestString);
             InputStream is = client.getInputStream();
-            int buffer_size = 1024;
-            ByteArrayOutputStream baos = new ByteArrayOutputStream();
-            byte[] bytes = new byte[buffer_size];
-            while (true){
-                int read = is.read(bytes);
-                if (-1 == read){
-                    break;
-                }
-                baos.write(bytes,0,read);
-                if (read!=buffer_size){
-                    break;
-                }
-            }
-            result = baos.toByteArray();
+
+            result =  readBytes(is);
             client.close();
 
         }catch (Exception e){
@@ -124,5 +112,22 @@ public class MiniBrowser {
             result = e.toString().getBytes(StandardCharsets.UTF_8);
         }
         return result;
+    }
+
+    public static byte[] readBytes(InputStream is) throws IOException {
+        int buffer_size = 1024;
+        byte[] bytes = new byte[buffer_size];
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        while (true){
+            int read = is.read(bytes);
+            if (-1 == read){
+                break;
+            }
+            baos.write(bytes,0,read);
+            if (read!=buffer_size){
+                break;
+            }
+        }
+        return baos.toByteArray();
     }
 }
